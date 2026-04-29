@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-16 15:53:57
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-04-29 11:45:28
+ * @LastEditTime: 2026-04-29 11:52:50
  * @FilePath: /webpack-demo/build/webpack.prod.config.cjs
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -36,7 +36,7 @@ module.exports = merge(base, {
       filename: 'css/[name].[contenthash:8].css',
       chunkFilename: 'css/chunks/[id].[contenthash:8].css',
     }),
-    new BundleAnalyzerPlugin() // 构建后自动打开分析页面
+    // new BundleAnalyzerPlugin() // 构建后自动打开分析页面
   ],
   module: {
     rules: [
