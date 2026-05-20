@@ -5,7 +5,7 @@ import i18n from '../locales/i18n'
 
 // 不同环境的 baseURL
 const baseURLMap = {
-  development: 'http://localhost:3000/api',
+  development: 'http://localhost:3001/api',
   production: 'https://your-domain.com/api',
 }
 
@@ -22,6 +22,7 @@ request.interceptors.request.use(
   (config) => {
     // 自动带上 token
     const token = localStorage.getItem('token')
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -37,16 +38,21 @@ request.interceptors.request.use(
 // ─── 响应拦截器 ────────────────────────────────────────────
 request.interceptors.response.use(
   (response) => {
-    const { data } = response
+    try {
+      const { data } = response
 
-    // 约定后端返回格式 { code, data, message }
-    if (data.code === 0 || data.code === 200) {
-      return data.data  // ✅ 只返回 data 字段，组件里直接用
+      // 约定后端返回格式 { code, data, message }
+      if (data.code === 0 || data.code === 200) {
+        return data  // ✅ 只返回 data 字段，组件里直接用
+      }
+
+      // 业务错误
+      message.error(data.error || data.message || '请求失败')
+      return Promise.reject(new Error(data.error || data.message))
+    } catch (error) {
+      console.log('error*', error);
+      
     }
-
-    // 业务错误
-    message.error(data.message || '请求失败')
-    return Promise.reject(new Error(data.message))
   },
   (error) => {
     // HTTP 错误
@@ -68,6 +74,7 @@ request.interceptors.response.use(
     // 401 跳转登录页
     if (status === 401) {
       localStorage.removeItem('token')
+      localStorage.removeItem('user');
       window.location.href = '/login'
     }
 

@@ -1,3 +1,11 @@
+/*
+ * @Author: luoxuanming 1316570222@qq.com
+ * @Date: 2026-04-21 15:31:42
+ * @LastEditors: luoxuanming 1316570222@qq.com
+ * @LastEditTime: 2026-05-13 13:02:55
+ * @FilePath: /webpack-demo/src/router/index.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import React from 'react'
 import { createBrowserRouter, redirect } from "react-router";
 
@@ -8,12 +16,16 @@ import {
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-
+import { RouteErrorPage } from '../components/ErrorBoundary';
 const Layout = React.lazy(() => import('../components/Layout'))
+const Login = React.lazy(() => import('../pages/login/login-view'))
 const Home = React.lazy(() => import('../pages/home/home-view'))
 const About = React.lazy(() => import('../pages/about/about-view'))
 const User = React.lazy(() => import('../pages/user/user-view'))
 const Admin = React.lazy(() => import('../pages/admin/admin-view'))
+const ChatAi = React.lazy(() => import('../pages/chat-ai/chat-ai-view'))
+// 路由守卫
+const AuthGuard = React.lazy(() => import('./AuthGuard'))
 
 
 const getName = (name = 'app') => { 
@@ -36,6 +48,7 @@ const router = createBrowserRouter([
     element: <Layout />,      // App 作为所有页面的公共布局
     handle: { titleKey: 'menu.home' },  
     icon: <DesktopOutlined/>,
+    errorElement: <RouteErrorPage/>,
     children: [
       {
         index: true,
@@ -75,8 +88,18 @@ const router = createBrowserRouter([
         element: <Admin />,
         handle: { titleKey: 'menu.admin' },
         icon: <TeamOutlined/>,
-      }
+      },
     ]
+  },
+  {
+    path: "/chat-ai",
+    element: <AuthGuard><ChatAi /></AuthGuard>,
+    handle: { titleKey: 'menu.chatAi' },
+    icon: <TeamOutlined/>,
+  },
+  {
+    path: '/login',
+    element: <Login />
   }
 ])
 

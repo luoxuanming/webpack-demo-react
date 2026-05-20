@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-16 18:22:33
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-04-28 17:46:02
+ * @LastEditTime: 2026-05-07 13:32:46
  * @FilePath: /webpack-demo/src/LayoutView.jsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -22,6 +22,7 @@ import {
 import useStore from '../../store/useStore'
 import {cloneDeep} from 'lodash'
 import router from '../../router'
+import { ErrorBoundary } from '../ErrorBoundary';
 
 import {
   DesktopOutlined,
@@ -110,6 +111,7 @@ const LayoutView = (props) => {
   }, [appStore.language])
   
   return (
+    <ErrorBoundary>
     <Layout style={{ minHeight: '100vh' }} token={appStore.antdTheme}>
       <Sider collapsible collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
         {/* <div className="demo-logo-vertical">Logo</div> */}
@@ -175,6 +177,7 @@ const LayoutView = (props) => {
         </Footer>
       </Layout>
     </Layout>
+    </ErrorBoundary>
   );
 };
 export default observer(LayoutView);
