@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-21 15:25:06
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-05-20 14:51:32
+ * @LastEditTime: 2026-06-22 15:50:40
  * @FilePath: /webpack-demo/src/pages/chatAi/index.jsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -22,19 +22,22 @@ import { observer, inject } from 'mobx-react'
 import useStore from '../../store/useStore'
 import styles from './chat-ai.module.less'
 import dayjs from 'dayjs'
-import { Button, Input, Spin, message, Tooltip, Layout, Dropdown, Space, Avatar } from 'antd';
+import { Button, Input, Spin, message, Tooltip, Layout, Dropdown, Space, Avatar, theme } from 'antd';
 import {
   SendOutlined,
   DeleteOutlined,
   RobotOutlined,
   UserOutlined,
+  MessageOutlined,
   PlusOutlined,
   LoadingOutlined,
   CopyOutlined,
   CheckOutlined,
   DownOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MoreOutlined
 } from '@ant-design/icons';
+import cx from 'classnames'
 // 顶部新增导入
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -54,6 +57,7 @@ const chatAiView = (props) => {
 
   const { chatAiStore, appStore } = useStore()
 
+  const [dotId, setDotId] = useState('')
   const [sessions, setSessions] = useState([]);   // 当前会话 ID
   const [collapsed, setCollapsed] = useState(false);
   const [sessionId, setSessionId] = useState();   // 当前会话 ID
@@ -63,8 +67,12 @@ const chatAiView = (props) => {
   const [streamText, setStreamText] = useState('');    // 流式输出的实时文字
   const [initializing, setInitializing] = useState(true); // 是否正在初始化
   const messagesEndRef = useRef(null);                 // 用于自动滚动到底部
-
-  // const id = searchParams.get('id')  // id = '2'
+  const {
+    token: { colorBgContainer, borderRadiusLG, colorPrimary, colorBgTextActive, colorBgBase, colorTextLabel},
+  } = theme.useToken();
+  console.log('token**', theme.useToken());
+  
+  // const id = searchParams.get('id' )  // id = '2'
   useEffect(() => {
     const currentMatch = matches[matches.length - 1]
     const title = currentMatch?.handle?.title || location.pathname
@@ -112,6 +120,9 @@ const chatAiView = (props) => {
       // 带自定义 header 的请求
       // const data2 = await chatAiApi.getListWithHeader('/chatAi/list', { page: 1 })
       // setSessions(data2)
+    } catch (error) {
+      console.log('error',error);
+      message.error('获取会话失败，请重试');
     } finally {
       setLoading(false)
       setInitializing(false)
@@ -134,6 +145,7 @@ const chatAiView = (props) => {
       // }
       // await createSession();
       setSessionId(null)
+      setMessages([])
       message.success('已开启新对话');
     } catch (error){
       console.log('error',error);
@@ -327,6 +339,12 @@ const chatAiView = (props) => {
     }
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+    message.success('已退出登录');
+  }
 
   const items = [
     {
@@ -357,6 +375,7 @@ const chatAiView = (props) => {
       key: '5',
       label: '退出',
       icon: <SettingOutlined />,
+      onClick: handleLogout, 
     },
   ];
 
@@ -385,47 +404,110 @@ const chatAiView = (props) => {
     <div className={styles.chatPage}>
       {/* ── 顶部标题栏 ── */}
       <Sider collapsed={collapsed} onCollapse={value => setCollapsed(value)}>
-        <div className="ai-chat__title">
-          <RobotOutlined className="ai-chat__title-icon" />
-          <span>AI 助手</span>
-        </div>
-        <Tooltip title="开启新对话">
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleNewChat}
-            disabled={loading}
-            className="ai-chat__new-btn"
-          >
-            {t('chatAi.newChat')}
-          </Button>
-        </Tooltip>
-        <div>当前会话id:{sessionId}</div>
-
-        <div className={styles.sessionList}>
-          {
-            sessions?.map((item, index) => (
-              <div className={styles.sessionItem} key={item.sessionId} onClick={() => {
-                handleSession(item.sessionId)
-              }} style={{background:sessionId == item.sessionId ? 'green' : 'red'}}>
-                <span className={styles.text}>{item.title}</span>
-                <span className={styles.icon}>...</span>
-              </div>
-            ))
-          }
-        </div>
-
-        {/* 个人中心 */}
-        <div className={styles.userBox}>
-          <Dropdown menu={{ items }}>
-            <a className={styles.userInfo} onClick={e => e.preventDefault()}>
-              <Space>
-                <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
-                铭铭就～
-                <DownOutlined />
-              </Space>
-            </a>
-          </Dropdown>
+        <div className={styles.sideBox}>
+          {/* <div className={styles.logoBox}>
+            <Avatar style={{ backgroundColor: '#87d068' }} icon={<RobotOutlined />} />
+            <span>AI 助手</span>
+          </div> */}
+          <div className={styles.toolbarBox}>
+            <Tooltip title="开启新对话">
+              <Button
+                type="primary"
+                size='small'
+                icon={<MessageOutlined />}
+                onClick={handleNewChat}
+                disabled={loading}
+                className="ai-chat__new-btn"
+              >
+                {t('chatAi.newChat')}
+              </Button>
+            </Tooltip>
+          </div>
+          {/* <div>当前会话id:{sessionId}</div> */}
+          <div className={styles.sessionListBox}>
+            <div className={styles.sessionListTitle}>Recents：{sessions.length}</div>
+            <div className={styles.sessionList}>
+            {
+              sessions?.map((item, index) => (
+                <div className={cx(styles.sessionItem, { [styles.active]: sessionId == item.sessionId })} key={item.sessionId} onClick={() => {
+                  handleSession(item.sessionId)
+                }} style={{
+                  background:sessionId == item.sessionId ? colorPrimary : colorBgTextActive,
+                  color:sessionId == item.sessionId ? colorBgBase : colorTextLabel,
+                  }}>
+                  <span className={styles.text}>{item.title}</span>
+                  {/* {
+                    sessionId == item.sessionId ? <span className={styles.icon}>...</span> : null
+                  } */}
+                  <div className={cx(styles.icon, { 
+                    [styles.active]: sessionId == item.sessionId,
+                    [styles.showDot]: item.sessionId == dotId
+                    })}>
+                    <Dropdown
+                    placement="bottomRight"
+                      menu={{
+                        items: [
+                          {
+                            label: '删除',
+                            key: 'delete',
+                            danger: true,
+                          },
+                          // {
+                          //   label: '重命名',
+                          //   key: 'rename',
+                          // },
+                        ],
+                        onClick: async({ key }) => {
+                          if (key === 'delete') {
+                            // 处理删除
+                            try {
+                              const { code, data } = await chatAiApi.deleteSession(sessionId)
+                              if (code === 0) {
+                                message.success('成功移除会话');
+                                getSessions();
+                                setSessionId(null)
+                                if(sessionId === item.sessionId) {
+                                  setMessages([])
+                                }
+                              }
+                            } catch (error) {
+                              message.error('操作失败');
+                            }
+                            
+                          } else if (key === 'rename') {
+                            // 处理重命名
+                          }
+                        },
+                      }}
+                      trigger={['click']}
+                    >
+                      <MoreOutlined style={{
+                        
+                      }} className={styles.dot} onClick={e => {
+                        e.stopPropagation();
+                        setDotId(item.sessionId)
+                      }} />
+                    </Dropdown>
+                  </div>
+                  
+                </div>
+              ))
+            }
+            </div>
+          </div>
+          
+          {/* 个人中心 */}
+          <div className={styles.userBox}>
+            <Dropdown menu={{ items }}>
+              <a className={styles.userInfo} onClick={e => e.preventDefault()}>
+                <Space>
+                  <Avatar style={{ backgroundColor: '#87d068' }} icon={<UserOutlined />} />
+                  铭铭就～
+                  <DownOutlined />
+                </Space>
+              </a>
+            </Dropdown>
+          </div>
         </div>
       </Sider>
       

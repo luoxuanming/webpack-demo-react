@@ -48,57 +48,156 @@
   width: 100vw;
   height: 100vh;
 
-  .sessionList {
-    .sessionItem {
-      height: 22px;
+  .sideBox {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 48px;
+    box-sizing: border-box;
+
+    .logoBox {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      box-sizing: border-box;
-      margin: 2px 8px;
-      padding: 0 4px;
-      cursor: pointer;
-      background-color: red;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      .text {
-        flex: 1;
-        white-space: nowrap;
+      justify-content: center;
+      height: 56px;
+      gap: 8px;
+    }
+  
+    .toolbarBox {
+      padding: 8px;
+      height: 100px;
+    }
+  
+    .sessionListBox {
+      flex: 1;
+      overflow-y: auto;
+      .sessionListTitle {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        padding: 0 8px;
       }
-      .icon {
-        width: 8px;
+  
+      .sessionList {
+        .sessionItem {
+          position: relative;
+          height: 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+          margin: 2px 8px;
+          padding: 0 4px;
+          cursor: pointer;
+          background-color: red;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          overflow: hidden;
+          .text {
+            flex: 1;
+            white-space: nowrap;
+          }
+          &:hover {
+            .icon {
+              display: flex;
+
+            }
+          }
+          .icon {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 20px;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            
+
+            .dot {
+              // background-color: #05824d;
+              background: transparent;
+              border-radius: 4px;
+              font-size: 12px;
+              padding: 1px;
+              box-sizing: border-box;
+              &:hover {
+                background: rgba(182,190,176,1);
+              }
+              &:active, &:focus {
+                background: rgba(182,190,176,1);
+              }
+            }
+          }
+
+          .showDot{
+            display: flex;
+          }
+          .showDot.active{
+            .dot { 
+              background-color: #05824d !important;
+            }
+          }
+          .icon.active  {
+            .dot {
+                &:hover {
+                  background-color: #05824d !important;
+                }
+              }
+          }
+          &::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(to right, transparent, #d2d8cb 60%);
+          }
+          &.active {
+            &::after {
+              width: 80px;
+              background: linear-gradient(to right, transparent, var(--ant-color-primary) 60%);
+            }
+          }
+          &:actived {
+            background: gray;
+          }
+          &:hover {
+            background: gray; 
+          }
+        }
       }
-      &:actived {
-        background: gray;
-      }
-      &:hover {
-        background: gray; 
+    }
+  
+    .userBox {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 48px;
+      width: 100%;
+      .userInfo {
+        display: block;
+        margin: 0 8px;
+        height: 100%;
+        display: flex;
+        align-items: center;
       }
     }
   }
 
-  .userBox {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 48px;
-    width: 100%;
-    .userInfo {
-      display: block;
-      margin: 0 8px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-    }
-  }
+  
+  
   .main {
     flex: 1;
     height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    gap: 8px;
 
     .messageBox {
       flex: 1;

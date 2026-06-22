@@ -38,6 +38,7 @@
     "@emotion/styled": "^11.14.1",
     "antd": "^6.3.7",
     "axios": "^1.15.2",
+    "classnames": "^2.5.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.20",
     "i18next": "^26.0.8",
