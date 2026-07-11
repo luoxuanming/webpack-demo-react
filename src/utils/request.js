@@ -6,7 +6,8 @@ import i18n from '../locales/i18n'
 // 不同环境的 baseURL
 const baseURLMap = {
   development: 'http://localhost:3001/api',
-  production: 'http://47.107.43.140/api',
+  // production: 'http://47.107.43.140/api',
+  production: 'https://luoxuanming.clound/api',
 }
 
 const request = axios.create({

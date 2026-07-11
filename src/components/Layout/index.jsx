@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-16 18:22:33
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-05-07 13:32:46
+ * @LastEditTime: 2026-07-11 23:03:40
  * @FilePath: /webpack-demo/src/LayoutView.jsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -173,7 +173,7 @@ const LayoutView = (props) => {
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>
-          Ant Design ©{currentYear} Created by Ant UED
+          AI-助手 ©{currentYear} Created by LuoXuanMing 粤ICP备2026093473号-1
         </Footer>
       </Layout>
     </Layout>
