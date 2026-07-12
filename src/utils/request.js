@@ -7,7 +7,7 @@ import i18n from '../locales/i18n'
 const baseURLMap = {
   development: 'http://localhost:3001/api',
   // production: 'http://47.107.43.140/api',
-  production: 'https://luoxuanming.clound/api',
+  production: 'https://luoxuanming.cloud/api',
 }
 
 const request = axios.create({
