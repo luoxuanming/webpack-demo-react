@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-21 15:25:06
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-05-13 16:08:34
+ * @LastEditTime: 2026-07-12 13:57:22
  * @FilePath: /webpack-demo/src/pages/login/index.jsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -22,7 +22,7 @@ import { observer, inject } from 'mobx-react'
 import useStore from '../../store/useStore'
 import styles from './login.module.less'
 import dayjs from 'dayjs'
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Space } from 'antd';
 import {
   MailOutlined,
   LockOutlined,
@@ -210,11 +210,11 @@ const loginView = (props) => {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: '请输入邮箱' },
+                { required: true, message: '请输入QQ邮箱' },
                 { type: 'email', message: '邮箱格式不正确' },
               ]}
             >
-              <Input prefix={<MailOutlined />} placeholder="邮箱地址" />
+                <Input prefix={<MailOutlined />} placeholder="QQ邮箱地址" />
             </Form.Item>
             <Form.Item
               name="password"
@@ -242,11 +242,11 @@ const loginView = (props) => {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: '请输入邮箱' },
+                { required: true, message: '请输入QQ邮箱' },
                 { type: 'email', message: '邮箱格式不正确' },
               ]}
             >
-              <Input prefix={<MailOutlined />} placeholder="邮箱地址" />
+              <Input prefix={<MailOutlined />} placeholder="QQ邮箱地址" />
             </Form.Item>
             {/* <Form.Item name="code" rules={[{ required: true, message: '请输入验证码' }]}>
               <Input
