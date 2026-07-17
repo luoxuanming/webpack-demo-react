@@ -2,7 +2,7 @@
  * @Author: luoxuanming 1316570222@qq.com
  * @Date: 2026-04-21 15:25:06
  * @LastEditors: luoxuanming 1316570222@qq.com
- * @LastEditTime: 2026-07-17 14:30:04
+ * @LastEditTime: 2026-07-17 15:54:58
  * @FilePath: /webpack-demo/src/pages/chatAi/index.jsx
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -67,6 +67,12 @@ const chatAiView = (props) => {
   const [streamText, setStreamText] = useState('');    // 流式输出的实时文字
   const [initializing, setInitializing] = useState(true); // 是否正在初始化
   const messagesEndRef = useRef(null);                 // 用于自动滚动到底部
+  const [sessionsPageConfig, setSessionsPageConfig] = useState({pageNum: 1, pageSize: 50, total: 0})
+  const [sessionsLoading, setSessionsLoading] = useState(false)
+  const [hasMoreSessions, setHasMoreSessions] = useState(true)
+  const sessionsRequestRef = useRef(false)
+  const sessionsPageRef = useRef(1)
+  const hasMoreSessionsRef = useRef(true)
   const {
     token: { colorBgContainer, borderRadiusLG, colorPrimary, colorBgTextActive, colorBgBase, colorTextLabel},
   } = theme.useToken();
@@ -76,7 +82,7 @@ const chatAiView = (props) => {
   useEffect(() => {
     const currentMatch = matches[matches.length - 1]
     const title = currentMatch?.handle?.title || location.pathname
-    getSessions()
+    getSessions({ page: 1 })
 
   }, [])
 
@@ -104,13 +110,32 @@ const chatAiView = (props) => {
     }
   }
 
-  const getSessions = async () => {
-    setLoading(true)
+  const getSessions = async ({ page = 1, append = false } = {}) => {
+    if (sessionsRequestRef.current || (append && !hasMoreSessionsRef.current)) return
+
+    sessionsRequestRef.current = true
+    setSessionsLoading(true)
     try {
       // 普通请求
-      const {code, data} = await chatAiApi.getSessions({ page: 1, pageSize: 10 })
+      const {code, data, pagination} = await chatAiApi.getSessions({ page, pageSize: sessionsPageConfig.pageSize })
       if(code == 0) {
-        setSessions(data)
+        // 兼容接口直接返回数组，以及 { list, total } 两种分页格式。
+        const sessionItems = Array.isArray(data) ? data : (data?.list || data?.records || data?.items || data?.rows || [])
+        const total = Array.isArray(data) ? undefined : data?.total
+
+        setSessions(prev => {
+          if (!append) return sessionItems
+          const existingIds = new Set(prev.map(item => item.sessionId))
+          return [...prev, ...sessionItems.filter(item => !existingIds.has(item.sessionId))]
+        })
+        setSessionsPageConfig(prev => ({ ...prev, pageNum: page, total: pagination.total || 0 }))
+        sessionsPageRef.current = page
+        const moreSessions =
+          typeof total === 'number'
+            ? (append ? sessions.length : 0) + sessionItems.length < total
+            : sessionItems.length >= sessionsPageConfig.pageSize
+        hasMoreSessionsRef.current = moreSessions
+        setHasMoreSessions(moreSessions)
         setInitializing(false)
       } else {
         setInitializing(false)
@@ -124,8 +149,16 @@ const chatAiView = (props) => {
       console.log('error',error);
       message.error('获取会话失败，请重试');
     } finally {
-      setLoading(false)
+      sessionsRequestRef.current = false
+      setSessionsLoading(false)
       setInitializing(false)
+    }
+  }
+
+  const handleSessionsScroll = (event) => {
+    const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
+    if (scrollHeight - scrollTop - clientHeight < 24) {
+      getSessions({ page: sessionsPageRef.current + 1, append: true })
     }
   }
 
@@ -293,6 +326,7 @@ const chatAiView = (props) => {
          },
         body: JSON.stringify({ sessionId, message: text, email: user.email }),
       });
+      
       // 逐块读取流式数据
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -324,9 +358,13 @@ const chatAiView = (props) => {
               // 收到结束信号
               if (data.done) {
                 // 可以在这里刷新左侧会话列表
-                getSessions(); // ← 刷新左侧会话列表
+                getSessions({ page: 1 }); // 刷新左侧会话列表
               }
             } catch (_) {}
+          }
+          if (line.startsWith('{"error"')) {
+            message.error(JSON.parse(line)?.error)
+            return
           }
         }
       }
@@ -430,8 +468,8 @@ const chatAiView = (props) => {
             </Tooltip>
           </div>
           {/* <div>当前会话id:{sessionId}</div> */}
-          <div className={styles.sessionListBox}>
-            <div className={styles.sessionListTitle}>Recents：{sessions.length}</div>
+          <div className={styles.sessionListBox} onScroll={handleSessionsScroll}>
+            <div className={styles.sessionListTitle}>Recents：{sessionsPageConfig.total}</div>
             <div className={styles.sessionList}>
             {
               sessions?.map((item, index) => (
@@ -467,12 +505,12 @@ const chatAiView = (props) => {
                           if (key === 'delete') {
                             // 处理删除
                             try {
-                              const { code, data } = await chatAiApi.deleteSession(sessionId)
+                              const { code, data } = await chatAiApi.deleteSession(item.sessionId)
                               if (code === 0) {
                                 message.success('成功移除会话');
-                                getSessions();
-                                setSessionId(null)
+                                getSessions({ page: 1 });
                                 if(sessionId === item.sessionId) {
+                                  setSessionId(null)
                                   setMessages([])
                                 }
                               }
@@ -499,6 +537,12 @@ const chatAiView = (props) => {
                 </div>
               ))
             }
+            {sessionsLoading && (
+              <div className={styles.sessionsLoading}><Spin size="small" /> 正在加载...</div>
+            )}
+            {!sessionsLoading && sessions.length > 0 && !hasMoreSessions && (
+              <div className={styles.sessionsEnd}>没有更多会话了</div>
+            )}
             </div>
           </div>
           
